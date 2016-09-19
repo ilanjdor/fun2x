@@ -42,10 +42,65 @@
 ///    file, run the resulting executable, and parse and return the result!
 ///    Try `man system` and `man popen`.
 
-size_t spec_size(const char* spec) {
-    (void) spec;
-    // YOUR CODE HERE
-    return 0;
+size_t spec_align1(char spec) {
+    if (spec == 'c')
+      return __alignof__(char);
+    else if (spec == 's')
+      return __alignof__(short);
+    else if (spec == 'i')
+      return __alignof__(int);
+    else if (spec == 'l')
+      return __alignof__(long);
+    else if (spec == 'f')
+      return __alignof__(float);
+    else if (spec == 'd')
+      return __alignof__(double);
+    else if (spec == 'p')
+      return __alignof__(void*);
+    else
+      return 0;
+}
+
+size_t spec_size1(char spec) {
+    if (spec == 'c')
+      return sizeof(char);
+    else if (spec == 's')
+      return sizeof(short);
+    else if (spec == 'i')
+      return sizeof(int);
+    else if (spec == 'l')
+      return sizeof(long);
+    else if (spec == 'f')
+      return sizeof(float);
+    else if (spec == 'd')
+      return sizeof(double);
+    else if (spec == 'p')
+      return sizeof(void*);
+    else
+      return 0;
+}
+
+size_t spec_align(const char* spec) {
+    size_t curalign = 1;
+    for (; *spec != '\0'; ++spec) {
+        size_t a = spec_align1(*spec);
+        if (a > curalign)
+            curalign = a;
+    }
+    return curalign;
+}
+
+size_t spec_size(const char* spec) {    
+    size_t struct_alignment = spec_align(spec);
+    size_t pos = 0;
+    for(; *spec != 0; ++spec) {
+        size_t align = spec_align1(*spec);
+        pos += (pos % align == 0) ? 0 : align - pos % align;
+        // added padding; add element!
+        pos += spec_size1(*spec);
+    }
+    pos += (pos % struct_alignment == 0) ? 0 : struct_alignment - pos % struct_alignment;
+    return pos;
 }
 
 int main(int argc, char* argv[]) {
